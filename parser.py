@@ -8,7 +8,7 @@ def get_report_year(xbrl, file_name):
     return year
 
 def parse_reports(folder_path):
-    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith("xml")]
     # files.sort(key=os.path.getmtime)
     
     net_income = {}
@@ -21,14 +21,20 @@ def parse_reports(folder_path):
     for f in files:      
         x = XBRL(os.path.join(folder_path, f))
         fiscal_year = get_report_year(x, f)
+
+        # TODO: assert if year already exists
+        # if fiscal_year in net_income:
+        #     assert "Year " + fiscal_year + "parsed twice for " + f
+
         net_income[fiscal_year] = x.fields['NetIncomeLoss']
         equity[fiscal_year] = x.fields['Equity']
-        dividends[fiscal_year] = x.fields['PreferredStockDividendsAndOtherAdjustments']
+        dividends[fiscal_year] = x.fields['PaymentsOfDividends']
+        buy_backs[fiscal_year] = x.fields['PaymentsForRepurchaseOfCommonStock']
         revenue[fiscal_year] = x.fields['Revenues']
         ops_cash[fiscal_year] = x.fields['NetCashFlowsOperating']
     
     output_file = open(os.path.join(folder_path, "numbers.csv"), "w") 
-    output_file.write("Year, Net Income, Equity, Dividends, Revenue, Operating Cash, \n")
+    output_file.write("Year, Net Income, Equity, Dividends, Buy Backs, Revenue, Operating Cash, \n")
     for key in sorted(net_income.iterkeys()):
         output_file.write(key)
         output_file.write(", ")
@@ -37,6 +43,8 @@ def parse_reports(folder_path):
         output_file.write(str(equity[key]))
         output_file.write(", ")
         output_file.write(str(dividends[key]))
+        output_file.write(", ")
+        output_file.write(str(buy_backs[key]))
         output_file.write(", ")
         output_file.write(str(revenue[key]))
         output_file.write(", ")

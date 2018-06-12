@@ -385,6 +385,16 @@ class FundamentantalAccountingConcepts:
         self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = self.xbrl.GetFactValue("us-gaap:PreferredStockDividendsAndOtherAdjustments", "Duration")
         if self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments']== None:
             self.xbrl.fields['PreferredStockDividendsAndOtherAdjustments'] = 0
+
+        #PaymentsOfDividends
+        self.xbrl.fields['PaymentsOfDividends'] = self.xbrl.GetFactValue("us-gaap:PaymentsOfDividends", "Duration")
+        if self.xbrl.fields['PaymentsOfDividends']== None:
+            self.xbrl.fields['PaymentsOfDividends'] = 0
+
+        #PaymentsForRepurchaseOfCommonStock
+        self.xbrl.fields['PaymentsForRepurchaseOfCommonStock'] = self.xbrl.GetFactValue("us-gaap:PaymentsForRepurchaseOfCommonStock", "Duration")
+        if self.xbrl.fields['PaymentsForRepurchaseOfCommonStock']== None:
+            self.xbrl.fields['PaymentsForRepurchaseOfCommonStock'] = 0
                 
         #NetIncomeAttributableToNoncontrollingInterest
         self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:NetIncomeLossAttributableToNoncontrollingInterest", "Duration")
