@@ -395,6 +395,11 @@ class FundamentantalAccountingConcepts:
         self.xbrl.fields['PaymentsForRepurchaseOfCommonStock'] = self.xbrl.GetFactValue("us-gaap:PaymentsForRepurchaseOfCommonStock", "Duration")
         if self.xbrl.fields['PaymentsForRepurchaseOfCommonStock']== None:
             self.xbrl.fields['PaymentsForRepurchaseOfCommonStock'] = 0
+
+        #DepreciationDepletionAndAmortization
+        self.xbrl.fields['DepreciationDepletionAndAmortization'] = self.xbrl.GetFactValue("us-gaap:DepreciationDepletionAndAmortization", "Duration")
+        if self.xbrl.fields['DepreciationDepletionAndAmortization']== None:
+            self.xbrl.fields['DepreciationDepletionAndAmortization'] = 0
                 
         #NetIncomeAttributableToNoncontrollingInterest
         self.xbrl.fields['NetIncomeAttributableToNoncontrollingInterest'] = self.xbrl.GetFactValue("us-gaap:NetIncomeLossAttributableToNoncontrollingInterest", "Duration")

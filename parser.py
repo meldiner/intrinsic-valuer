@@ -17,6 +17,7 @@ def parse_reports(folder_path):
     revenue = {}
     buy_backs = {}
     ops_cash = {}
+    depreciation = {}
     
     for f in files:      
         x = XBRL(os.path.join(folder_path, f))
@@ -32,8 +33,11 @@ def parse_reports(folder_path):
         buy_backs[fiscal_year] = x.fields['PaymentsForRepurchaseOfCommonStock']
         revenue[fiscal_year] = x.fields['Revenues']
         ops_cash[fiscal_year] = x.fields['NetCashFlowsOperating']
+        depreciation[fiscal_year] = x.fields['DepreciationDepletionAndAmortization']
     
-    output_file = open(os.path.join(folder_path, "numbers.csv"), "w") 
+    output_file = open(os.path.join(folder_path, "numbers.csv"), "w")
+
+    # Big Four Numbers
     output_file.write("Year, Net Income, Equity, Dividends, Buy Backs, Revenue, Operating Cash, \n")
     for key in sorted(net_income.iterkeys()):
         output_file.write(key)
@@ -49,5 +53,18 @@ def parse_reports(folder_path):
         output_file.write(str(revenue[key]))
         output_file.write(", ")
         output_file.write(str(ops_cash[key]))
+        output_file.write(", ")
+        output_file.write("\n")
+
+    output_file.write("\n")
+
+    #OWNER EARNINGS
+    output_file.write("Year, Net Income, Depreciation and Amortization, \n")
+    for key in sorted(net_income.iterkeys()):
+        output_file.write(key)
+        output_file.write(", ")
+        output_file.write(str(net_income[key]))
+        output_file.write(", ")
+        output_file.write(str(depreciation[key]))
         output_file.write(", ")
         output_file.write("\n")
