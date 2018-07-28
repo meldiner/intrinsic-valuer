@@ -17,3 +17,4 @@ requests==2.11.0
 singledispatch==3.4.0.3
 six==1.11.0
 wrapt==1.10.11
+XlsxWriter==1.0.5

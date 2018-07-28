@@ -3,5 +3,5 @@
 To run:
 ```
 pip install -r requirements.txt
-python main.py --scrape true --parse true
+python main.py --scrape --parse
 ```
