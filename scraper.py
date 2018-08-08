@@ -50,12 +50,15 @@ def download_report(ticker,dir_path):
                     print "Target URL is:", target_url
                     
                     file_name = target_url.split('/')[-1]
-                    print file_name
-                   
-                    xbrl_report = urllib2.urlopen(target_url)
-                    output = open(os.path.join(dir_path,file_name),'wb')
-                    output.write(xbrl_report.read())
-                    output.close()
-                    
+                    file_path = os.path.join(dir_path,file_name)
+
+                    if os.path.isfile(file_path):
+                        print file_name + " exists, skipping"
+                    else:
+                        print "downloading " + file_name
+                        xbrl_report = urllib2.urlopen(target_url)
+                        output = open(file_path,'wb')
+                        output.write(xbrl_report.read())
+                        output.close()
             except:
                 pass
