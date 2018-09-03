@@ -25,7 +25,7 @@ def get_list(ticker):
     
     return href
 
-def download_report(ticker,dir_path):
+def download_sec_filings(ticker,dir_path):
     url_list = get_list(ticker)
     
     target_base_url = 'http://www.sec.gov'

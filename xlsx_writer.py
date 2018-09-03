@@ -2,14 +2,17 @@ import xlsxwriter
 
 def write(db, file):
     workbook = xlsxwriter.Workbook(file)
-    worksheet = workbook.add_worksheet()
+    worksheet1 = workbook.add_worksheet()
+    worksheet2 = workbook.add_worksheet()
 
     row = 0
-    row = write_big_four_numbers(worksheet, row, db)
+    row = write_big_four_numbers(worksheet1, row, db)
     row += 1
-    row = write_owner_earnings(worksheet, row, db)
+    row = write_owner_earnings(worksheet1, row, db)
     row += 1
-    row = write_margin_of_safety(worksheet, row, db)
+    row = write_margin_of_safety(worksheet1, row, db)
+
+    write_price_ratio(worksheet2, db)
 
 def write_row(worksheet, row, values):
     col = 0
@@ -153,3 +156,29 @@ def write_margin_of_safety(worksheet, row, db):
     row += 1
 
     return row
+
+def write_price_ratio(worksheet, db):
+    years = [""]
+    pe = ["Price/Earnings"]
+    pb = ["Price/Book"]
+    ps = ["Price/Sales"]
+    pcf = ["Price/Cash Flow"]
+
+    for year in sorted(db["Price/Earnings"]):
+        years.append(year)
+        pe.append(db["Price/Earnings"][year])
+        pb.append(db["Price/Book"][year])
+        ps.append(db["Price/Sales"][year])
+        pcf.append(db["Price/Cash Flow"][year])
+
+    row = 0
+    write_row(worksheet, row, years)
+    row += 1
+    write_row(worksheet, row, pe)
+    row += 1
+    write_row(worksheet, row, pb)
+    row += 1
+    write_row(worksheet, row, ps)
+    row += 1
+    write_row(worksheet, row, pcf)
+

@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
-from scraper import download_report
+from sec_scraper import download_sec_filings
+from price_ratio_scraper import download_historical_price_ratio
 from parser import parse_reports
 from csv_writer import write as write_csv
 from xlsx_writer import write as write_xlsx
@@ -8,7 +9,8 @@ import os
 
 def main():
     parser = argparse.ArgumentParser(description='Estimate companies intrinsic value.')
-    parser.add_argument("--scrape", type=bool, const=True, nargs='?')
+    parser.add_argument("--scrape-sec", type=bool, const=True, nargs='?')
+    parser.add_argument("--scrape-price-ratio", type=bool, const=True, nargs='?')
     parser.add_argument("--parse", type=bool, const=True, nargs='?')
     args = parser.parse_args()
 
@@ -18,10 +20,15 @@ def main():
 
     tickers = Tickers
 
-    if args.scrape:
+    if args.scrape_sec:
         for ticker in tickers:
             dir_path = base_path + "/" + ticker
-            download_report(ticker, dir_path)
+            download_sec_filings(ticker, dir_path)
+    
+    if args.scrape_price_ratio:
+        for ticker in tickers:
+            dir_path = base_path + "/" + ticker
+            download_historical_price_ratio(ticker, dir_path)
 
     if args.parse:
         for ticker in tickers:

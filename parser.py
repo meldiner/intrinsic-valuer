@@ -1,4 +1,5 @@
 import os
+import json
 from xbrl import XBRL
 
 def add_missing_fields(xbrl):
@@ -55,9 +56,8 @@ def get_report_year(xbrl, file_name):
         year = file_name.split('-')[1].split('.')[0][:4]
     return year
 
-def parse_reports(folder_path):
+def parse_sec_reports(folder_path):
     files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith("xml")]
-    # files.sort(key=os.path.getmtime)
     
     db = {}
     db["net_income"] = {}
@@ -98,5 +98,19 @@ def parse_reports(folder_path):
         db["eps"][fiscal_year] = x.fields['EarningsPerShareDiluted']
     
     return db
-    
 
+def parse_price_ratio_reports(folder_path):
+    with open(os.path.join(folder_path, 'historical_price_ratio.json')) as f:
+        db = json.load(f)
+    return db
+
+def merge_two_dicts(x, y):
+    z = x.copy()   # start with x's keys and values
+    z.update(y)    # modifies z with y's keys and values & returns None
+    return z
+
+def parse_reports(folder_path):
+    db1 = parse_sec_reports(folder_path)
+    db2 = parse_price_ratio_reports(folder_path)
+    db = merge_two_dicts(db1, db2)
+    return db
