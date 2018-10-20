@@ -1,184 +1,36 @@
-import xlsxwriter
+from openpyxl import load_workbook
+import datetime
 
 def write(db, file):
-    workbook = xlsxwriter.Workbook(file)
-    worksheet1 = workbook.add_worksheet()
-    worksheet2 = workbook.add_worksheet()
+    wb = load_workbook("template.xlsx")
+    worksheet = wb['data']
 
-    row = 0
-    row = write_big_four_numbers(worksheet1, row, db)
-    row += 1
-    row = write_owner_earnings(worksheet1, row, db)
-    row += 1
-    row = write_margin_of_safety(worksheet1, row, db)
+    end_year = datetime.datetime.now().year 
+    start_year = end_year - 10 # we are analysing a history of 10 years
 
-    write_price_ratio(worksheet2, db)
+    row = 1
+    col = 1
+    worksheet.cell(column=col, row=row, value="Year")
+    col = col + 1
 
-def write_row(worksheet, row, values):
-    col = 0
-    for value in values:
-        worksheet.write(row, col, value)
-        col += 1
+    for key in sorted(db):
+        worksheet.cell(column=col, row=row, value=key)
+        col = col + 1
 
-def get_cell(row, col):
-    return chr(64 + col) + str(row)
+    row = row + 1
+    col = 1
 
-def growth_fx(row, col):
-    return "=IFERROR(" + get_cell(row + 1, col) + "/" + get_cell(row, col) + "-1" + ", \"\")"
+    for year in (range(start_year, end_year + 1, 1)):
+        year_str = str(year)
+        worksheet.cell(column=col, row=row, value=year)
+        col = col + 1
 
-def average_fx(start, end, col):
-    return "=average(" + get_cell(start, col) + ":" + get_cell(end, col) + ")"
+        for key in sorted(db):
+            if year_str in db[key] and db[key][year_str]:
+                worksheet.cell(column=col, row=row, value=db[key][year_str])
+            col = col + 1
 
-def write_big_four_numbers(worksheet, row, db):
-    write_row(worksheet, row, ["Big Four Numbers"])
-    row += 1
-
-    write_row(worksheet, row, ["Year", "Net Income", "", "Equity + Dividends", "", "Sales", "", "Operating Cash", ""])
-    row += 1
-
-    start = row + 1
-
-    for key in sorted(db["net_income"].iterkeys()):
-        values = [key]
+        row = row + 1
         col = 1
-        values.append(str(db["net_income"][key]))
-        col += 1
-        values.append(growth_fx(row, col))
-        col += 1
-        values.append("=" + str(db["equity"][key]) + "+" + str(db["dividends"][key]))
-        col += 1
-        values.append(growth_fx(row, col))
-        col += 1
-        values.append(str(db["revenue"][key]))
-        col += 1
-        values.append(growth_fx(row, col))
-        col += 1
-        values.append(str(db["ops_cash"][key]))
-        col += 1
-        values.append(growth_fx(row, col))
-        col += 1
-        write_row(worksheet, row, values)
-        row += 1
 
-    values = ["Average"]
-    col = 2
-    values.append("")
-    col += 1
-    values.append(average_fx(start, row, col))
-    col += 1
-    values.append("")
-    col += 1
-    values.append(average_fx(start, row, col))
-    col += 1
-    values.append("")
-    col += 1 
-    values.append(average_fx(start, row, col))
-    col += 1
-    values.append("")
-    col += 1
-    values.append(average_fx(start, row, col))
-    col += 1
-    values.append("")
-    col += 1
-    write_row(worksheet, row, values)
-    row += 1
-
-    values = ["Baseline Windage Growth Rate", "=average(" + get_cell(row, 2) + ":" + get_cell(row, col) + ")"]
-    write_row(worksheet, row, values)
-    row += 1
-
-    return row
-
-def write_owner_earnings(worksheet, row, db):
-    write_row(worksheet, row, ["Owner Earnings"])
-    row += 1
-
-    write_row(worksheet, row, ["Year", "Operating Cash", "Capital Expenditures", "Number of Shares (diluted)", "Owners Earnings"])
-    row += 1
-
-    for key in sorted(db["net_income"].iterkeys()):
-        values = [key, str(db["ops_cash"][key]), str(db["expenditures"][key]), str(db["shares"][key])]
-
-        if db["shares"][key] != 0: 
-            values.append(str((db["ops_cash"][key] - db["expenditures"][key]) / db["shares"][key]))
-        else:
-            values.append("ZERO SHARES ERROR")
-
-        write_row(worksheet, row, values)
-        row += 1
-
-    return row
-
-def write_margin_of_safety(worksheet, row, db):
-    write_row(worksheet, row, ["Margin of Safety"])
-    row += 1
-
-    year = max(db["eps"].iterkeys())
-    write_row(worksheet, row, ["EPS (diluted) for " + str(year), db["eps"][year]])
-    row += 1
-    eps_row = row
-    eps_col = 2
-
-    write_row(worksheet, row, ["Windage Growth Rate", "=0.16"])
-    row += 1
-    wgr_row = row
-    wgr_col = 2
-
-    write_row(worksheet, row, ["Highest P/E", "=22"])
-    row += 1
-    hpe_row = row
-    hpe_col = 2
-
-    write_row(worksheet, row, ["Wideage P/E", "=min(" + get_cell(wgr_row, wgr_col) + "*200," + get_cell(hpe_row, hpe_col) + ")"])
-    row += 1
-    wpe_row = row
-    wpe_col = 2
-
-    write_row(worksheet, row, ["Minimum Acceptable Rate of Return", "15%"])
-    row += 1
-
-    write_row(worksheet, row, ["Future 10-Year EPS", "=" + get_cell(eps_row, eps_col) + "*(1+" + get_cell(wgr_row, wgr_col) + ")^10"])
-    row += 1
-    feps_row = row
-    feps_col = 2
-    
-    write_row(worksheet, row, ["Future 10-Year Share Price", "=" + get_cell(feps_row, feps_col) + "*" + get_cell(wpe_row, wpe_col)])
-    row += 1
-    fsp_row = row
-    fsp_col = 2
-
-    write_row(worksheet, row, ["Sticker Price", "=" + get_cell(fsp_row, fsp_col) + "/4"])
-    row += 1
-    sp_row = row
-    sp_col = 2
-
-    write_row(worksheet, row, ["Buy Price", "=" + get_cell(sp_row, sp_col) + "/2"])
-    row += 1
-
-    return row
-
-def write_price_ratio(worksheet, db):
-    years = [""]
-    pe = ["Price/Earnings"]
-    pb = ["Price/Book"]
-    ps = ["Price/Sales"]
-    pcf = ["Price/Cash Flow"]
-
-    for year in sorted(db["Price/Earnings"]):
-        years.append(year)
-        pe.append(db["Price/Earnings"][year])
-        pb.append(db["Price/Book"][year])
-        ps.append(db["Price/Sales"][year])
-        pcf.append(db["Price/Cash Flow"][year])
-
-    row = 0
-    write_row(worksheet, row, years)
-    row += 1
-    write_row(worksheet, row, pe)
-    row += 1
-    write_row(worksheet, row, pb)
-    row += 1
-    write_row(worksheet, row, ps)
-    row += 1
-    write_row(worksheet, row, pcf)
-
+    wb.save(file)

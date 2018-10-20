@@ -104,13 +104,20 @@ def parse_price_ratio_reports(folder_path):
         db = json.load(f)
     return db
 
-def merge_two_dicts(x, y):
-    z = x.copy()   # start with x's keys and values
-    z.update(y)    # modifies z with y's keys and values & returns None
-    return z
-
 def parse_reports(folder_path):
     db1 = parse_sec_reports(folder_path)
     db2 = parse_price_ratio_reports(folder_path)
-    db = merge_two_dicts(db1, db2)
+
+    db = {}
+
+    db["b. Net Income"] = db1["net_income"]
+    db["c. Equity"] = db1["equity"]
+    db["d. Dividends"] = db1["dividends"]
+    db["e. Sales"] = db1["revenue"]
+    db["f. Operating Cash"] = db1["ops_cash"]
+    db["g. Capital Expenditures"] = db1["expenditures"]
+    db["h. Number of Shares (diluted)"] = db1["shares"]
+    db["i. EPS (diluted)"] = db1["eps"]
+    db["j. Price/Earnings"] = db2["Price/Earnings"]
+
     return db
